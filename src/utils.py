@@ -6,6 +6,8 @@ import pandas as pd
 from src.exception import CustomException
 from src.logger import logging
 
+from sklearn.metrics import mean_absolute_error,mean_squared_error,r2_score
+
 def save_object(file_path, obj):
     try:
         dir_path = os.path.dirname(file_path)
@@ -16,3 +18,27 @@ def save_object(file_path, obj):
 
     except Exception as e:
         raise CustomException(e, sys)
+    
+def evaluate_model(X_train,X_test,y_train,y_test,models):
+    try:
+        report = {}
+        for i in range(len(models)):
+            model = list(models.values())[i]
+            model.fit(X_train,y_train)# train model
+            y_test_pred = model.predict(X_test)# predicting test data
+            model_r2_score = r2_score(y_test,y_test_pred)
+
+            report[list(models.keys())[i]] = model_r2_score
+        return report
+        
+    except Exception as e:
+        logging.info("Error occurred during model training")
+        CustomException(e,sys)
+
+def load_object(file_path):
+    try:
+        with open(file_path,'rb') as file_obj:
+            return pickle.load(file_obj)
+    except Exception as e:
+        logging.info('Exception occurred in load_object function in utils.py')
+        raise CustomException(e,sys)
